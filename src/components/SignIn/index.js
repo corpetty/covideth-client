@@ -6,6 +6,7 @@ import gql from 'graphql-tag';
 import { SignUpLink } from '../SignUp';
 import * as routes from '../../constants/routes';
 import ErrorMessage from '../Error';
+// import { GoogleLogin } from 'react-google-login';
 
 const SIGN_IN = gql`
   mutation($login: String!, $password: String!) {
@@ -15,11 +16,22 @@ const SIGN_IN = gql`
   }
 `;
 
+const googleResponse = (response) => {
+  console.log(response);
+};
+
 const SignInPage = ({ history, refetch }) => (
   <div>
     <h1>SignIn</h1>
     <SignInForm history={history} refetch={refetch} />
     <SignUpLink />
+    {/* <GoogleLogin
+      clientId="247620031399-7jurs427f4pei0noi4p2onj7m68uadn8.apps.googleusercontent.com"
+      buttonText="Login"
+      onSuccess={googleResponse}
+      onFailure={googleResponse}
+      cookiePolicy={'single_host_origin'}
+    /> */}
   </div>
 );
 
@@ -29,7 +41,28 @@ const INITIAL_STATE = {
 };
 
 class SignInForm extends Component {
+  constructor() {
+    super();
+    this.state = {
+      isAuthenticated: false,
+      token: '',
+      user: null,
+    }
+  }
+
   state = { ...INITIAL_STATE };
+
+  logout = () => {
+    this.setState({
+      isAuthenticated: false,
+      token: '', 
+      user: null,
+    })
+  }
+
+  onFailure = (error) => {
+    alert(error);
+  }
 
   onChange = event => {
     const { name, value } = event.target;
@@ -58,6 +91,7 @@ class SignInForm extends Component {
     return (
       <Mutation mutation={SIGN_IN} variables={{ login, password }}>
         {(signIn, { data, loading, error }) => (
+          <div>
           <form onSubmit={event => this.onSubmit(event, signIn)}>
             <input
               name="login"
@@ -79,6 +113,7 @@ class SignInForm extends Component {
 
             {error && <ErrorMessage error={error} />}
           </form>
+          </div>
         )}
       </Mutation>
     );
